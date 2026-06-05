@@ -10,13 +10,13 @@
     "chat",
     "openai-compatible"
   ],
-  "homepage": "https://github.com/hmzlife/flixly-js-sdk#readme",
-  "bugs": "https://github.com/hmzlife/flixly-js-sdk/issues",
+  "homepage": "https://github.com/Softforge-Digital/flixly-js-sdk#readme",
+  "bugs": "https://github.com/Softforge-Digital/flixly-js-sdk/issues",
   "license": "MIT",
   "author": "Flixly <support@flixly.ai>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hmzlife/flixly-js-sdk.git"
+    "url": "git+https://github.com/Softforge-Digital/flixly-js-sdk.git"
   },
   "type": "module",
   "main": "./dist/index.cjs",
