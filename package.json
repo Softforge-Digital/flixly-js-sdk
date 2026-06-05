@@ -1,0 +1,51 @@
+{
+  "name": "@flixly/sdk",
+  "version": "0.1.0",
+  "description": "Official Flixly AI SDK for Node.js and the browser. Generate images, video, audio, and chat completions through Flixly's public API.",
+  "keywords": [
+    "flixly",
+    "ai",
+    "image-generation",
+    "video-generation",
+    "chat",
+    "openai-compatible"
+  ],
+  "homepage": "https://github.com/hmzlife/flixly-js-sdk#readme",
+  "bugs": "https://github.com/hmzlife/flixly-js-sdk/issues",
+  "license": "MIT",
+  "author": "Flixly <support@flixly.ai>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hmzlife/flixly-js-sdk.git"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "lint": "tsc --noEmit",
+    "test": "node --experimental-vm-modules --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "sideEffects": false
+}
