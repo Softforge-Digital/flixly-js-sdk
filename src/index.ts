@@ -207,11 +207,18 @@ export class Flixly {
     if (!opts?.apiKey) throw new Error("Flixly: `apiKey` is required");
     this.apiKey = opts.apiKey;
     this.baseUrl = (opts.baseUrl || BASE_URL).replace(/\/$/, "");
-    this.fetchImpl = opts.fetch || globalThis.fetch;
-    this.timeoutMs = opts.timeoutMs ?? 120_000;
-    if (!this.fetchImpl) {
+    // Bind fetch to globalThis so calling it as `this.fetchImpl(...)`
+    // doesn't pass the Flixly instance as the receiver. Native fetch
+    // requires `this === window` (or globalThis); without the bind,
+    // it throws "Failed to execute 'fetch' on 'Window': Illegal
+    // invocation" in any environment that's strict about the
+    // receiver check (Chrome, Figma's UI iframe, Edge, etc.).
+    const baseFetch = opts.fetch || globalThis.fetch;
+    if (!baseFetch) {
       throw new Error("Flixly: no fetch implementation. Pass `fetch` in options on Node < 18.");
     }
+    this.fetchImpl = opts.fetch ? baseFetch : baseFetch.bind(globalThis);
+    this.timeoutMs = opts.timeoutMs ?? 120_000;
   }
 
   // ─── Generations ───────────────────────────────────────────────

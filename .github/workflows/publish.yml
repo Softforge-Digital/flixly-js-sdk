@@ -1,0 +1,78 @@
+# Publishes @flixly/sdk to npm with provenance attestation whenever
+# a v* tag is pushed. Uses npm Trusted Publishing (OIDC) — no
+# NPM_TOKEN secret required.
+#
+# Required setup (one-time, only needed for the FIRST run):
+#   1. https://www.npmjs.com/package/@flixly/sdk/access →
+#      "Add trusted publisher" → GitHub Actions →
+#      Softforge-Digital / flixly-js-sdk / publish.yml /
+#      "Allow npm publish" checked.
+#
+# To cut a release:
+#   git tag v0.1.x -m "..." && git push origin v0.1.x
+#
+# The workflow then exchanges a short-lived OIDC token from GitHub
+# for an npm publish credential and publishes with provenance
+# attestation. The published package gets a verified "Provenance"
+# badge on npmjs.com tying the release to this exact workflow run.
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+# id-token: write unlocks OIDC for npm — without it the Trusted
+# Publisher token exchange fails.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Build + publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # Upgrade npm to ≥11.5.1 — Ubuntu's setup-node ships an older
+      # bundled npm. OIDC for Trusted Publishers was overhauled in
+      # 11.5.1.
+      - name: Upgrade npm
+        run: |
+          npm install -g npm@latest
+          echo "npm version: $(npm --version)"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # setup-node@v4 writes its .npmrc to $NPM_CONFIG_USERCONFIG with
+      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}`. With no
+      # token defined, the env var resolves to empty and npm tries to
+      # authenticate with an empty bearer token (returns 404) BEFORE
+      # OIDC ever gets attempted. Scrub those lines so npm falls
+      # through to the OIDC code path.
+      - name: Strip empty-token line from active npmrc
+        run: |
+          NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+          if [ -f "$NPMRC" ]; then
+            sed -i '/_authToken/d' "$NPMRC"
+            sed -i '/always-auth/d' "$NPMRC"
+          fi
+
+      - name: Publish to npm with provenance (OIDC)
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ""

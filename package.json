@@ -1,6 +1,6 @@
 {
   "name": "@flixly/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official Flixly AI SDK for Node.js and the browser. Generate images, video, audio, and chat completions through Flixly's public API.",
   "keywords": [
     "flixly",
